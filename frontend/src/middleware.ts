@@ -23,6 +23,10 @@ export const config = {
      "/withdraw/:path*",
      "/transactions/:path*",
      "/profile/:path*",
+     "/new-employee/:path*",
+     "/create-customer-account/:path*",
+     "/customers/:path*",
+     
      
     ],
 };

@@ -5,7 +5,7 @@ const Transaction = require("../models/transactions");
 const authMiddleware = require("../middlewares/authMiddleware");
 const mongoose = require("mongoose");
 const router = express.Router();
-
+const employeeAuth = require("../middlewares/employeeAuth");
 router.get("/balance", authMiddleware, async (req, res) => {
   try {
     // Find all accounts belonging to the user
@@ -282,6 +282,46 @@ router.get("/user-bank-accounts", authMiddleware, async (req, res) => {
   }
 });
 
+// Get accounts for a specific customer (for admin/employee use)
+router.get("/customer/:id/accounts", authMiddleware, employeeAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { accountType } = req.query;
+    
+    
+    
+    // Build filter
+    const filter = { userId: id };
+    if (accountType && ["Savings", "Checking"].includes(accountType)) {
+      filter.accountType = accountType;
+    }
+    
+    const accounts = await Account.find(filter);
+
+    if (!accounts || accounts.length === 0) {
+      return res.status(200).json({
+        message: "No accounts found for this customer",
+        accounts: [],
+      });
+    }
+
+    res.status(200).json({
+      message: "Customer accounts retrieved successfully",
+      accounts: accounts.map((account) => ({
+        id: account._id,
+        accountNumber: account.accountNumber,
+        accountType: account.accountType,
+        balance: account.balance,
+        createdAt: account.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error("Error retrieving customer accounts:", error);
+    res
+      .status(500)
+      .json({ message: "Error retrieving customer accounts", error: error.message });
+  }
+});
 /**
  * Delete a bank account
  * Implements the DELETE /account/{id} endpoint documented in Swagger
@@ -488,6 +528,76 @@ router.post("/apply-interest", authMiddleware, async (req, res) => {
     res
       .status(500)
       .json({ message: "Error applying interest", error: error.message });
+  }
+});
+
+/**
+ * Create a bank account for a customer (for admin/employee use)
+ */
+router.post("/employee-create-customer-bank-account", authMiddleware, employeeAuth, async (req, res) => {
+  try {
+    const { userId, accountType, initialDeposit } = req.body;
+
+    // Verify userId is provided
+    if (!userId) {
+      return res.status(400).json({ message: "Customer ID is required" });
+    }
+
+    // Verify the customer exists
+    const customer = await User.findById(userId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    if (!accountType || !["Savings", "Checking"].includes(accountType)) {
+      return res.status(400).json({
+        message: "Valid account type (Savings or Checking) is required"
+      });
+    }
+
+    // Validate initial deposit if provided
+    const initialAmount = initialDeposit ? parseFloat(initialDeposit) : 0;
+    if (initialDeposit && (isNaN(initialAmount) || initialAmount < 0)) {
+      return res.status(400).json({ message: "Initial deposit must be a non-negative number" });
+    }
+
+    const accountNumber = Math.floor(
+      1000000000 + Math.random() * 9000000000
+    ).toString();
+    
+    const newAccount = await Account.create({
+      userId,
+      accountNumber,
+      accountType,
+      balance: initialAmount,
+    });
+
+    // Create an initial deposit transaction if there was an initial deposit
+    if (initialAmount > 0) {
+      await Transaction.create({
+        accountId: newAccount._id,
+        type: "initial_deposit",
+        amount: initialAmount,
+        description: "Initial deposit by bank employee"
+      });
+    }
+
+    res.status(201).json({
+      message: "Account created successfully for customer",
+      account: {
+        id: newAccount._id,
+        accountNumber: newAccount.accountNumber,
+        accountType: newAccount.accountType,
+        balance: newAccount.balance,
+        createdAt: newAccount.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating customer account:", error);
+    res.status(500).json({ 
+      message: "Error creating customer account", 
+      error: error.message 
+    });
   }
 });
 

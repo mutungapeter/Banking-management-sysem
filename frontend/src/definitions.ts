@@ -45,4 +45,15 @@ export interface User {
   last_name: string;
   email: string;
   phone: string;
+  role: 'employee' | 'customer';
 }
+
+
+export interface Customer {
+  _id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+}
+

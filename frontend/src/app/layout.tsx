@@ -40,7 +40,7 @@ export default function RootLayout({
           pauseOnHover
           theme="colored" 
         />
-        <div className="min-h-screen  p-3">
+        <div className="min-h-screen  mx-auto p-3">
           {children}
         </div>
         <Footer />

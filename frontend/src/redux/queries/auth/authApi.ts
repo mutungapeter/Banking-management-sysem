@@ -54,6 +54,51 @@ export const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
+    // register first employee 
+    registerFirstEmployee: builder.mutation({
+      query: ({ first_name, last_name, email, phone, password }) => ({
+        url: `auth/create-first-employee/`,
+        method: "POST",
+        body: {
+          first_name,
+          last_name,
+          email,
+          phone,
+          password,
+        },
+      }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          console.log("Registration successful:", result);
+        } catch (error) {
+          console.error("Registration error:", error);
+        }
+      },
+    }),
+    // register employee accessible by an existing employee  who can create a new employee
+    registerEmployee: builder.mutation({
+      query: ({ first_name, last_name, email, phone, password }) => ({
+        url: `auth/register-employee/`,
+        method: "POST",
+        body: {
+          first_name,
+          last_name,
+          email,
+          phone,
+          password,
+        },
+      }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          console.log("Registration successful:", result);
+        } catch (error) {
+          console.error("Registration error:", error);
+        }
+      },
+    }),
+
     getCurrentUser: builder.query({
         query: () => ({
           url: `auth/current-user/`,
@@ -83,5 +128,6 @@ export const {
     useGetCurrentUserQuery,
   useLoginMutation,
   useRegisterMutation,
-
+  useRegisterFirstEmployeeMutation,
+  useRegisterEmployeeMutation,
 } = authApi;

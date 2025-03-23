@@ -17,9 +17,14 @@ const Login = () => {
     const password = formData.get("password") as string;
     
     try {
-      await login({ email, password }).unwrap();
-      toast.success("Login successful");
-      router.push("/dashboard");
+      const response = await login({ email, password }).unwrap();
+      console.log("response", response);
+      if (response.user.role === 'employee') {
+        router.push("/employee-dashboard");
+      } else {
+        toast.success(response.message || "Login successful");
+        router.push("/dashboard");
+      }
     } catch (error: unknown) {
       if (error && typeof error === "object" && "data" in error && error.data) {
         const errorData = (error as { data: { message: string } }).data;

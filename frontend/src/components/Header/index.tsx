@@ -1,20 +1,30 @@
 "use client";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { userLoggedOut } from "@/redux/queries/auth/authSlice";
+import { RootState } from "@/redux/store";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { BsCreditCard } from "react-icons/bs";
 import {
-  FiMenu,
-  FiX,
-  FiLogOut,
-  FiLogIn,
-  FiUserPlus,
   FiHome,
+  FiLogIn,
+  FiLogOut,
+  FiMenu,
+  FiUserPlus,
+  FiX,
 } from "react-icons/fi";
+import { GoPeople } from "react-icons/go";
 import { menuItems } from "./menuData";
-import { useAppSelector, useAppDispatch } from "@/redux/hooks";
-import { RootState } from "@/redux/store";
-import { userLoggedOut } from "@/redux/queries/auth/authSlice";
+
+// Define role-based menu items
+const adminMenuItems = [
+  { path: "/employee-dashboard", label: "Dashboard", icon: FiHome },
+  { path: "/new-employee", label: "New Employee", icon: FiUserPlus },
+  { path: "/customers", label: "Customers", icon: GoPeople },
+  { path: "/create-customer-account", label: "New Customer Bank Account", icon: BsCreditCard },
+];
+
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
@@ -38,7 +48,7 @@ const Header: React.FC = () => {
     router.push("/");
   };
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="bg-white w-full shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -58,8 +68,30 @@ const Header: React.FC = () => {
               <FiHome className="mr-2 h-5 w-5" />
               <span>Home</span>
             </Link>
-            {user && 
+            {user && user.role === "customer" &&
               menuItems.map((item) => {
+                const isActive = pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      isActive
+                        ? "text-white bg-primary"
+                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    <item.icon
+                      className={`mr-2 h-5 w-5 ${isActive ? "text-white" : ""}`}
+                    />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+              
+            {/* Admin-only menu items */}
+            {user && user.role === "employee" && 
+              adminMenuItems.map((item) => {
                 const isActive = pathname === item.path;
                 return (
                   <Link
@@ -129,7 +161,7 @@ const Header: React.FC = () => {
 
       <div className={`md:hidden ${isOpen ? "block" : "hidden"}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-        {user && menuItems.map((item) => {
+        {user && user.role === "customer" && menuItems.map((item) => {
             const isActive = pathname === item.path;
             return (
               <Link
@@ -148,6 +180,29 @@ const Header: React.FC = () => {
                 <span>{item.label}</span>
               </Link>
             );
+            })}
+            
+          {/* Admin-only mobile menu items */}
+          {user && user.role === "employee" && 
+            adminMenuItems.map((item) => {
+              const isActive = pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={closeMenu}
+                  className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                    isActive
+                      ? "text-primary bg-gray-50"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  <item.icon
+                    className={`mr-3 h-5 w-5 ${isActive ? "text-primary" : ""}`}
+                  />
+                  <span>{item.label}</span>
+                </Link>
+              );
             })}
 
           {user ? (

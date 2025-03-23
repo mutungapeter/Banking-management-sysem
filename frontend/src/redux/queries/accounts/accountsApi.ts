@@ -4,6 +4,13 @@ interface getAccountsInterface {
 
   accountType?: string;
 }
+
+interface getCustomersInterface {
+  first_name?: string;
+}
+
+
+
 export const accountsApis = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getTotalBalance: builder.query({
@@ -37,6 +44,7 @@ export const accountsApis = apiSlice.injectEndpoints({
         };
       },
     }),
+  
     getTransactions: builder.query({
       query: () => {
         return {
@@ -54,6 +62,7 @@ export const accountsApis = apiSlice.injectEndpoints({
         };
       },
     }),
+    
     deposit: builder.mutation({
       query: (data) => {
         return {
@@ -100,6 +109,7 @@ export const accountsApis = apiSlice.injectEndpoints({
         };
       },
     }),
+    
     deleteAccount: builder.mutation({
       query: (id) => {
         return {
@@ -126,6 +136,62 @@ export const accountsApis = apiSlice.injectEndpoints({
         };
       },
     }),
+    //get all customers by an employee
+    getCustomers: builder.query({
+      query: ({
+        first_name
+      }: getCustomersInterface = {}) => {
+        const queryParams: Record<string, string | number | boolean | undefined> = {};
+
+        if (first_name) queryParams.first_name = first_name;
+        
+        return {
+          url: `auth/customers/`,
+          method: "GET",
+          params: queryParams,
+        };  
+      },
+    }),
+    getCustomerDetails: builder.query({
+      query: (id: string) => ({
+        url: `auth/customer/${id}/`,
+        method: "GET",
+      }),
+    }),
+    getCustomerAccountsById: builder.query({
+      query: ({
+        id,
+        accountType
+      }: { id: string } & getAccountsInterface) => {
+        const queryParams: Record<string, string | number | boolean | undefined> = {};
+
+        if (accountType) queryParams.accountType = accountType;
+        
+        return {
+          url: `/account/customer/${id}/accounts`,
+          method: "GET",
+          params: queryParams,
+        };
+      },
+    }),
+    updateCustomerProfile: builder.mutation({
+      query: ({id, data}) => {
+        return {
+          url: `auth/update-customer-info/${id}/`,
+          method: "PUT",
+          body: data,
+        };
+      },
+    }),
+    createCustomerAccount: builder.mutation({
+      query: (data) => {
+        return {
+          url: `account/employee-create-customer-bank-account/`,
+          method: "POST",
+          body: data,
+        };
+      },
+    }),
   }),
 });
 
@@ -142,4 +208,9 @@ export const {
   useDeleteAccountMutation,
   useCalculateInterestMutation,
   useApplyInterestMutation,
+  useGetCustomersQuery,
+  useGetCustomerDetailsQuery,
+  useGetCustomerAccountsByIdQuery,
+  useUpdateCustomerProfileMutation,
+  useCreateCustomerAccountMutation,
 } = accountsApis;
