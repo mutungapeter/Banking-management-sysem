@@ -1,0 +1,75 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply relative z-1 bg-white font-satoshi  font-normal text-body;
+    }
+}
+
+@layer components {
+}
+
+@layer utilities {
+    /* Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+  
+}
+
+.react-datepicker-wrapper {
+    width: 100%;
+    height: auto !important;
+  }
+  
+  
+  .react-datepicker__input-container {
+    width: 100%;
+    height: auto !important;
+    position: relative;
+    position: relative;
+  }
+  
+  
+  .react-datepicker__input-container input {
+    width: 100%;
+    height: 2.5rem; 
+    line-height: 2.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 2.5rem;
+    padding-right: 1rem; 
+   
+    box-sizing: border-box; 
+  }
+  
+  
+  .react-datepicker__calendar-icon {
+    position: absolute;
+    left: 0.75rem; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    fill: gray;
+  }
+  
+  .react-datepicker-popper {
+    z-index: 1050; 
+  }
+  #root-portal {
+    z-index: 1050; 
+  }
+  
+  .react-datepicker {
+    z-index: 9999;
+  }
+  
